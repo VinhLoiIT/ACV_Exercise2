@@ -173,7 +173,7 @@ if __name__ == '__main__':
 
     if args.mode == 'train':
         checkpoints_dir = os.path.join(data_dir, 'checkpoints')
-        if os.path.exists(checkpoints_dir):
+        if not os.path.exists(checkpoints_dir):
             os.mkdir(checkpoints_dir)
         model = make_model(hidden_layers, lr)
         train(model, image_trainloader, image_valloader, epochs, print_every, checkpoints_dir)
