@@ -15,7 +15,7 @@ data_dir = 'data'
 train_dir = data_dir + '/train'
 valid_dir = data_dir + '/val'
 test_dir = data_dir + '/test'
-using_gpu = torch.cuda.is_available()
+device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 # TODO: Build and train your network
 epochs = 50
@@ -72,8 +72,8 @@ def cal_accuracy(model, dataloader):
     accuracy = 0
     for i, (inputs,labels) in enumerate(dataloader):
       optimizer.zero_grad()
-      inputs, labels = inputs.to('cuda') , labels.to('cuda')
-      model.to('cuda')
+      inputs, labels = inputs.to(device) , labels.to(device)
+      model.to(device)
       with torch.no_grad():    
           outputs = model.forward(inputs)
           validation_loss = criterion(outputs,labels)
@@ -94,7 +94,7 @@ def train(model, image_trainloader, image_valloader, epochs, print_every, save_d
     optimizer = optim.Adam(model.classifier.parameters(), lr=lr)
 
     # change to cuda
-    model.to('cuda')
+    model.to(device)
     model.train()
 
     for e in range(epochs):
@@ -102,7 +102,7 @@ def train(model, image_trainloader, image_valloader, epochs, print_every, save_d
         for ii, (inputs, labels) in enumerate(image_trainloader):
             steps += 1
 
-            inputs, labels = inputs.to('cuda'), labels.to('cuda')
+            inputs, labels = inputs.to(device), labels.to(device)
 
             optimizer.zero_grad()
 
@@ -128,12 +128,12 @@ def train(model, image_trainloader, image_valloader, epochs, print_every, save_d
 
 def testing(model, dataloader):
     model.eval()
-    model.to('cuda')
+    model.to(device)
     correct = 0
     total = 0
     with torch.no_grad():
         for inputs, labels in image_testloader:
-            inputs, labels = inputs.to('cuda'), labels.to('cuda')
+            inputs, labels = inputs.to(device), labels.to(device)
             outputs = model(inputs)
             _ , prediction = torch.max(outputs.data, 1)
             total += labels.size(0)
@@ -153,14 +153,14 @@ def save_model(epoch, model, save_dir='./'):
 def loading_checkpoint(path):
     
     # Loading the parameters
-    state = torch.load(path)
+    state = torch.load(path, map_location=torch.device(device))
     lr = state['learning_rate']
     structure = state['structure']
     hidden_layers = state['hidden_layers']
     epochs = state['epochs']
     
     # Building the model from checkpoints
-    model = make_model(structure, hidden_layers, lr)
+    model = make_model(hidden_layers, lr)
     model.load_state_dict(state['state_dict'])
     return model
 
