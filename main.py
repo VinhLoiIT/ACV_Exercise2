@@ -67,7 +67,7 @@ def make_model(hidden_layers, lr):
     model.classifier = classifier
     return model
 
-def cal_accuracy(model, optimizer, dataloader):
+def cal_accuracy(model, optimizer, criterion, dataloader):
     validation_loss = 0
     accuracy = 0
     for i, (inputs,labels) in enumerate(dataloader):
@@ -116,7 +116,7 @@ def train(model, image_trainloader, image_valloader, epochs, print_every, save_d
 
             if steps % print_every == 0:
                 model.eval()
-                val_loss, train_ac = cal_accuracy(model, optimizer, image_valloader)
+                val_loss, train_ac = cal_accuracy(model, optimizer, criterion, image_valloader)
                 print("Epoch: {}/{}... | ".format(e+1, epochs),
                       "Loss: {:.4f} | ".format(running_loss/print_every),
                       "Validation Loss {:.4f} | ".format(val_loss),
